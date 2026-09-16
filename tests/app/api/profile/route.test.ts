@@ -68,4 +68,21 @@ describe("PATCH /api/profile/[username]", () => {
     expect(body.bio).toBe("new bio");
     expect(body.customCss).toContain(".profile-custom-css .x");
   });
+
+  it("rejects a non-owner's attempt to update another user's profile", async () => {
+    const [otherUser] = await db
+      .insert(users)
+      .values({ username: "otheruser", passwordHash: "x", displayName: "Other User" })
+      .returning();
+    await db.insert(profiles).values({ userId: otherUser.id, bio: "other bio" });
+    const otherToken = createSessionToken({ userId: otherUser.id, username: "otheruser" });
+
+    const request = new NextRequest("http://localhost/api/profile/testuser", {
+      method: "PATCH",
+      headers: { cookie: `session=${otherToken}` },
+      body: JSON.stringify({ bio: "hacked bio" }),
+    });
+    const response = await PATCH(request, { params: { username: "testuser" } });
+    expect(response.status).toBe(403);
+  });
 });
