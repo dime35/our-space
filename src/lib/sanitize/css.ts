@@ -9,7 +9,7 @@ export function sanitizeAndScopeCss(rawCss: string): string {
   const result = postcss([
     prefixSelector({
       prefix: `.${PROFILE_CUSTOM_CSS_SCOPE_CLASS}`,
-      transform(prefix, _selector, prefixedSelector) {
+      transform(prefix: string, _selector: string, prefixedSelector: string) {
         return prefixedSelector;
       },
     }),
