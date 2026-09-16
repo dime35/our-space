@@ -34,6 +34,10 @@ export async function PATCH(request: NextRequest, { params }: { params: { userna
   if (typeof body.profileSongUrl === "string") update.profileSongUrl = body.profileSongUrl;
   if (typeof body.customCss === "string") update.customCss = sanitizeAndScopeCss(body.customCss);
 
+  if (Object.keys(update).length === 0) {
+    return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
+  }
+
   await updateProfile(session.userId, update);
   return NextResponse.json({ ok: true });
 }

@@ -3,7 +3,7 @@ import { db } from "../../db/client";
 import { postMedia } from "../../db/schema";
 
 export type MediaType = "image" | "video_upload" | "video_youtube" | "song";
-const VALID_TYPES = new Set<MediaType>(["image", "video_upload", "video_youtube", "song"]);
+export const VALID_TYPES = new Set<MediaType>(["image", "video_upload", "video_youtube", "song"]);
 
 export interface AttachMediaInput {
   postId: number;

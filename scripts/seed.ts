@@ -23,15 +23,18 @@ async function seedAccount(account: SeedAccount): Promise<void> {
     return;
   }
 
-  const [user] = await db
-    .insert(users)
-    .values({
-      username: account.username,
-      passwordHash: await hashPassword(account.password),
-      displayName: account.displayName,
-    })
-    .returning();
-  await db.insert(profiles).values({ userId: user.id });
+  const passwordHash = await hashPassword(account.password);
+  await db.transaction(async (tx) => {
+    const [user] = await tx
+      .insert(users)
+      .values({
+        username: account.username,
+        passwordHash,
+        displayName: account.displayName,
+      })
+      .returning();
+    await tx.insert(profiles).values({ userId: user.id });
+  });
   console.log(`Created account: ${account.username}`);
 }
 

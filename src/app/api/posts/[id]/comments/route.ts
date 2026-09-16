@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { addComment, listCommentsForPost } from "../../../../../lib/comments/repository";
 import { getPostById } from "../../../../../lib/posts/repository";
 import { requireSession } from "../../../../../lib/auth/require-session";
+import { parseId } from "../../../../../lib/parse-id";
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   const session = requireSession(request.cookies.get("session")?.value);
@@ -9,7 +10,10 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const postId = Number(params.id);
+  const postId = parseId(params.id);
+  if (postId === null) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   const post = await getPostById(postId);
   if (!post) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -25,6 +29,10 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 }
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
-  const list = await listCommentsForPost(Number(params.id));
+  const postId = parseId(params.id);
+  if (postId === null) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  const list = await listCommentsForPost(postId);
   return NextResponse.json(list);
 }

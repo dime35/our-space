@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { attachMedia, listMediaForPost, MediaType } from "../../../../../lib/posts/media-repository";
+import { attachMedia, listMediaForPost, MediaType, VALID_TYPES } from "../../../../../lib/posts/media-repository";
 import { getPostById } from "../../../../../lib/posts/repository";
 import { requireSession } from "../../../../../lib/auth/require-session";
-
-const VALID_TYPES = new Set(["image", "video_upload", "video_youtube", "song"]);
+import { parseId } from "../../../../../lib/parse-id";
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   const session = requireSession(request.cookies.get("session")?.value);
@@ -11,9 +10,15 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const postId = Number(params.id);
+  const postId = parseId(params.id);
+  if (postId === null) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   const post = await getPostById(postId);
-  if (!post || post.authorId !== session.userId) {
+  if (!post) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  if (post.authorId !== session.userId) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -32,6 +37,10 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 }
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
-  const list = await listMediaForPost(Number(params.id));
+  const postId = parseId(params.id);
+  if (postId === null) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  const list = await listMediaForPost(postId);
   return NextResponse.json(list);
 }

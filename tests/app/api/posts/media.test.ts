@@ -66,4 +66,31 @@ describe("POST /api/posts/[id]/media", () => {
     const response = await POST(request, { params: { id: String(postId) } });
     expect(response.status).toBe(403);
   });
+
+  it("returns 404 when the post does not exist", async () => {
+    const request = new NextRequest("http://localhost/x", {
+      method: "POST",
+      headers: { cookie: `session=${token}` },
+      body: JSON.stringify({ type: "image", url: "https://example.com/a.jpg", position: 0 }),
+    });
+    const response = await POST(request, { params: { id: "999999999" } });
+    expect(response.status).toBe(404);
+  });
+
+  it("returns 404 for a non-numeric id", async () => {
+    const request = new NextRequest("http://localhost/x", {
+      method: "POST",
+      headers: { cookie: `session=${token}` },
+      body: JSON.stringify({ type: "image", url: "https://example.com/a.jpg", position: 0 }),
+    });
+    const response = await POST(request, { params: { id: "not-a-number" } });
+    expect(response.status).toBe(404);
+  });
+});
+
+describe("GET /api/posts/[id]/media", () => {
+  it("returns 404 for a non-numeric id", async () => {
+    const response = await GET(new NextRequest("http://localhost/x"), { params: { id: "not-a-number" } });
+    expect(response.status).toBe(404);
+  });
 });

@@ -69,6 +69,16 @@ describe("PATCH /api/profile/[username]", () => {
     expect(body.customCss).toContain(".profile-custom-css .x");
   });
 
+  it("rejects an update with no recognized fields", async () => {
+    const request = new NextRequest("http://localhost/api/profile/testuser", {
+      method: "PATCH",
+      headers: { cookie: `session=${token}` },
+      body: JSON.stringify({}),
+    });
+    const response = await PATCH(request, { params: { username: "testuser" } });
+    expect(response.status).toBe(400);
+  });
+
   it("rejects a non-owner's attempt to update another user's profile", async () => {
     const [otherUser] = await db
       .insert(users)

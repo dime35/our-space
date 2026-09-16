@@ -50,4 +50,21 @@ describe("POST /api/posts/[id]/comments", () => {
     expect(list).toHaveLength(1);
     expect(list[0].body).toBe("<p>nice</p>");
   });
+
+  it("returns 404 for a non-numeric id", async () => {
+    const request = new NextRequest("http://localhost/x", {
+      method: "POST",
+      headers: { cookie: `session=${token}` },
+      body: JSON.stringify({ body: "<p>nice</p>" }),
+    });
+    const response = await POST(request, { params: { id: "not-a-number" } });
+    expect(response.status).toBe(404);
+  });
+});
+
+describe("GET /api/posts/[id]/comments", () => {
+  it("returns 404 for a non-numeric id", async () => {
+    const response = await GET(new NextRequest("http://localhost/x"), { params: { id: "not-a-number" } });
+    expect(response.status).toBe(404);
+  });
 });
