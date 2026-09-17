@@ -85,6 +85,12 @@ Chat is an explicitly separate, later project — not in this build.
   enumeration), modest rate-limiting on login attempts.
 - **Spotify API**: server-side proxy for search/token handling so API credentials
   never reach the client.
+- **Read access**: all GET endpoints (profiles, posts, comments, layout) are
+  intentionally public/unauthenticated — anyone with a URL can view a page,
+  matching classic MySpace behavior. Only writes (login, posting, editing,
+  commenting, layout changes) require a valid session. Decided explicitly
+  after the backend was built; revisit before public hosting if stronger
+  privacy is wanted later.
 
 ## Key decisions log
 
